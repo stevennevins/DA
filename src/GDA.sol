@@ -14,13 +14,13 @@ abstract contract GDA {
     /// @dev Represented as an 18 decimal fixed point number.
     int256 public immutable initialPrice;
 
-    /// @notice Sets target price and per time unit price decay for the VRGDA.
+    /// @notice Sets the initial price and per time unit price decay for the GDA.
     /// @param _initialPrice The target price for a token if sold on pace, scaled by 1e18.
     constructor(int256 _initialPrice) {
         initialPrice = _initialPrice;
     }
 
-    /// @notice Calculate the price of a token according to the VRGDA formula.
+    /// @notice Calculate the price of a token according to a decaying price schedule.
     /// @param timeSinceStart Time passed since the GDA began, scaled by 1e18.
     /// @return The price of a token according to GDA, scaled by 1e18.
     function getPrice(int256 timeSinceStart) public virtual returns (uint256);
@@ -38,7 +38,7 @@ contract LinearGDA is GDA {
         require(decayConstant < 0, "NON_NEGATIVE_DECAY_CONSTANT");
     }
 
-    /// @notice Calculate the price of a token according to the VRGDA formula.
+    /// @notice Calculate the price of a token according to a decaying price schedule.
     /// @param timeSinceStart Time passed since the GDA began, scaled by 1e18.
     /// @return The price of a token according to GDA, scaled by 1e18.
     function getPrice(int256 timeSinceStart) public view virtual override returns (uint256) {
@@ -60,7 +60,7 @@ contract LinearDiscreteGDA is LinearGDA {
         stepSize = _stepSize;
     }
 
-    /// @notice Calculate the price of a token according to the VRGDA formula.
+    /// @notice Calculate the price of a token according to a decaying price schedule.
     /// @param timeSinceStart Time passed since the GDA began, scaled by 1e18.
     /// @return The price of a token according to GDA, scaled by 1e18.
     function getPrice(int256 timeSinceStart) public view override returns (uint256) {
@@ -80,11 +80,10 @@ contract ExponentialDecayGDA is GDA {
     constructor(int256 _initialPrice, int256 _priceDecayPercent) GDA(_initialPrice) {
         decayConstant = wadLn(1e18 - _priceDecayPercent);
 
-        // The decay constant must be negative for VRGDAs to work.
         require(decayConstant < 0, "NON_NEGATIVE_DECAY_CONSTANT");
     }
 
-    /// @notice Calculate the price of a token according to the VRGDA formula.
+    /// @notice Calculate the price of a token according to a decaying price schedule.
     /// @param timeSinceStart Time passed since the GDA began, scaled by 1e18.
     /// @return The price of a token according to GDA, scaled by 1e18.
     function getPrice(int256 timeSinceStart) public view virtual override returns (uint256) {
@@ -106,7 +105,7 @@ contract ExponentialDiscreteGDA is ExponentialDecayGDA {
         stepSize = _stepSize;
     }
 
-    /// @notice Calculate the price of a token according to the VRGDA formula.
+    /// @notice Calculate the price of a token according to a decaying price schedule.
     /// @param timeSinceStart Time passed since the GDA began, scaled by 1e18.
     /// @return The price of a token according to GDA, scaled by 1e18.
     function getPrice(int256 timeSinceStart) public view override returns (uint256) {
